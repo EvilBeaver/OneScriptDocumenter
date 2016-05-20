@@ -75,7 +75,7 @@ namespace OneScriptDocumenter
 
             Directory.CreateDirectory(outputDir);
             var mdGen = new MarkdownDeep.Markdown();
-            mdGen.AutoHeadingIDs = true;
+            //mdGen.AutoHeadingIDs = true;
             mdGen.ExtraMode = true;
 
             foreach (var file in files)
