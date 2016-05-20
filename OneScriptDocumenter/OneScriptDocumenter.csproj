@@ -50,6 +50,7 @@
     <Compile Include="AssemblyDocumenter.cs" />
     <Compile Include="Documenter.cs" />
     <Compile Include="LoadedAssembly.cs" />
+    <Compile Include="MarkdownGen.cs" />
     <Compile Include="Model\AbstractSyntaxItem.cs" />
     <Compile Include="Model\Documentation.cs" />
     <Compile Include="Model\MultilangString.cs" />
@@ -67,6 +68,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="html_layout.htm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Markdown.xslt">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

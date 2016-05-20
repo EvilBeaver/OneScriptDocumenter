@@ -23,7 +23,7 @@ namespace OneScriptDocumenter
                 {
                     retCode = GenerateMarkdown(args);
                 }
-                if (args.Length > 0 && args[0] == "html")
+                else if (args.Length > 0 && args[0] == "html")
                 {
                     retCode = GenerateHtml(args);
                 }
@@ -74,9 +74,12 @@ namespace OneScriptDocumenter
                 .Select(x=>new {FullPath = x, RelativePath = x.Substring(inputDir.Length+1)});
 
             Directory.CreateDirectory(outputDir);
-            var mdGen = new MarkdownDeep.Markdown();
+            var mdGen = new MarkdownGen();
             //mdGen.AutoHeadingIDs = true;
             mdGen.ExtraMode = true;
+            mdGen.UrlBaseLocation = "stdlib";
+
+            var layout = ReadHTMLLayout();
 
             foreach (var file in files)
             {
@@ -84,18 +87,29 @@ namespace OneScriptDocumenter
                 using (var inputFile = new StreamReader(file.FullPath))
                 {
                     var content = inputFile.ReadToEnd();
-                    var html = mdGen.Transform(content);
                     var outputFile = Path.Combine(outputDir, file.RelativePath.Substring(0, file.RelativePath.Length-2)+"htm");
+                    
+                    var html = mdGen.Transform(content);
                     Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
 
                     using (var outStream = new StreamWriter(outputFile, false, Encoding.UTF8))
                     {
-                        outStream.Write(html);
+                        var full_html = layout.Replace("$title$", Path.GetFileNameWithoutExtension(outputFile))
+                            .Replace("$body$", html);
+                        outStream.Write(full_html);
                     }
                 }
             }
             Console.WriteLine("Done");
             return 0;
+        }
+
+        private static string ReadHTMLLayout()
+        {
+            using (var sr = new StreamReader("html_layout.htm"))
+            {
+                return sr.ReadToEnd();
+            }
         }
 
         private static int GenerateXml(string[] args)
@@ -194,7 +208,7 @@ namespace OneScriptDocumenter
             var tocBuilder = new StringBuilder();
             var knownNodes = new HashSet<string>();
             if (baseUrl == null)
-                baseUrl = "stdlib";
+                baseUrl = "";
 
             using (var layout = new StreamReader("toc_layout.md"))
             {
@@ -227,7 +241,7 @@ namespace OneScriptDocumenter
                     }
 
                     if (!knownNodes.Contains(name))
-                        tocWriter.WriteLine("* [{0}]({1}/{2})", baseUrl, name, link);
+                        tocWriter.WriteLine("* [{0}]({1}/{2})", name, baseUrl, link);
 
                 }
             }
