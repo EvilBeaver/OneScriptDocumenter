@@ -292,7 +292,7 @@ namespace OneScriptDocumenter
                         continue;
 
                     var node = new XElement(item.Name);
-                    ProcessChildNodes(node, summary);
+                    ProcessChildNodes(node, item);
                     element.Add(node);
                 }
             }
