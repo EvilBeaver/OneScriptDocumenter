@@ -146,7 +146,9 @@ namespace OneScriptDocumenter
             if (outputDir == null)
                 outputDir = Directory.GetCurrentDirectory();
 
-            return CreateDocumentation(xmlDoc, outputDir);
+            var baseUrl = cmdLineArgs.Next();
+
+            return CreateDocumentation(xmlDoc, outputDir, baseUrl);
 
         }
 
@@ -160,7 +162,7 @@ namespace OneScriptDocumenter
             return 0;
         }
 
-        private static int CreateDocumentation(string xmlDocPath, string pathOutput)
+        private static int CreateDocumentation(string xmlDocPath, string pathOutput, string baseUrl)
         {
             XDocument doc;
             using (var fs = new FileStream(xmlDocPath, FileMode.Open, FileAccess.Read))
@@ -191,10 +193,11 @@ namespace OneScriptDocumenter
             
             var tocBuilder = new StringBuilder();
             var knownNodes = new HashSet<string>();
-            string baseUrl;
+            if (baseUrl == null)
+                baseUrl = "stdlib";
+
             using (var layout = new StreamReader("toc_layout.md"))
             {
-                baseUrl = layout.ReadLine();
                 var content = layout.ReadToEnd();
                 tocBuilder.Append(content);
                 tocBuilder.Replace("$base_url$", baseUrl);
@@ -236,7 +239,7 @@ namespace OneScriptDocumenter
         {
             Console.WriteLine("Usage:");
             Console.WriteLine("documenter.exe <output-file> <path-to-dll> [<path-to-dll>...]");
-            Console.WriteLine("documenter.exe markdown <path-to-xml> <output-dir>");
+            Console.WriteLine("documenter.exe markdown <path-to-xml> <output-dir> [baseurl]");
             Console.WriteLine("documenter.exe html <markdown-dir> <output-dir>");
         }
 
