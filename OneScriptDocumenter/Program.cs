@@ -51,25 +51,24 @@ namespace OneScriptDocumenter
             var cmdLineArgs = new CommandLineArgs(args);
             cmdLineArgs.Next(); // пропуск ключевого слова
 
-            var inputDir = cmdLineArgs.Next();
-            if (inputDir == null)
+            var xmlDoc = cmdLineArgs.Next();
+            if (xmlDoc == null)
             {
                 ShowUsage();
                 return 1;
-            }
-
-            if (!Directory.Exists(inputDir))
-            {
-                Console.WriteLine("Input dir doesn't exist");
-                return 2;
             }
 
             var outputDir = cmdLineArgs.Next();
             if (outputDir == null)
                 outputDir = Directory.GetCurrentDirectory();
 
-            inputDir = Path.GetFullPath(inputDir);
+            var baseUrl = cmdLineArgs.Next();
 
+            var inputDir = Path.Combine(Environment.GetEnvironmentVariable("TMP"), Path.GetRandomFileName());
+            Directory.CreateDirectory(inputDir);
+
+            CreateDocumentation(xmlDoc, inputDir, baseUrl);
+            
             var files = Directory.EnumerateFiles(inputDir, "*.md", SearchOption.AllDirectories)
                 .Select(x=>new {FullPath = x, RelativePath = x.Substring(inputDir.Length+1)});
 
@@ -100,6 +99,8 @@ namespace OneScriptDocumenter
                     }
                 }
             }
+
+            Directory.Delete(inputDir, true);
             Console.WriteLine("Done");
             return 0;
         }
@@ -254,7 +255,7 @@ namespace OneScriptDocumenter
             Console.WriteLine("Usage:");
             Console.WriteLine("documenter.exe <output-file> <path-to-dll> [<path-to-dll>...]");
             Console.WriteLine("documenter.exe markdown <path-to-xml> <output-dir> [baseurl]");
-            Console.WriteLine("documenter.exe html <markdown-dir> <output-dir>");
+            Console.WriteLine("documenter.exe html <path-to-xml> <output-dir> [baseurl]");
         }
 
     }
