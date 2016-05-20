@@ -106,7 +106,7 @@ namespace OneScriptDocumenter
 
         private static string ReadHTMLLayout()
         {
-            using (var sr = new StreamReader("html_layout.htm"))
+            using (var sr = new StreamReader(ExtFiles.Get("html_layout.htm")))
             {
                 return sr.ReadToEnd();
             }
@@ -187,7 +187,7 @@ namespace OneScriptDocumenter
             string docContent = doc.ToString();
 
             XslTransform xslt = new XslTransform();
-            xslt.Load("markdown.xslt");
+            xslt.Load(ExtFiles.Get("markdown.xslt"));
             XPathDocument xpathdocument = new XPathDocument(new StringReader(docContent));
 
             var stream = new MemoryStream();
@@ -210,7 +210,7 @@ namespace OneScriptDocumenter
             if (baseUrl == null)
                 baseUrl = "";
 
-            using (var layout = new StreamReader("toc_layout.md"))
+            using (var layout = new StreamReader(ExtFiles.Get("toc_layout.md")))
             {
                 var content = layout.ReadToEnd();
                 tocBuilder.Append(content);

@@ -49,6 +49,7 @@
     <Compile Include="CommandLineArgs.cs" />
     <Compile Include="AssemblyDocumenter.cs" />
     <Compile Include="Documenter.cs" />
+    <Compile Include="ExtFiles.cs" />
     <Compile Include="LoadedAssembly.cs" />
     <Compile Include="MarkdownGen.cs" />
     <Compile Include="Model\AbstractSyntaxItem.cs" />
