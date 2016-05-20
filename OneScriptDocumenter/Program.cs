@@ -7,6 +7,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using System.Xml.Xsl;
+using System.Linq;
 
 namespace OneScriptDocumenter
 {
@@ -21,6 +22,10 @@ namespace OneScriptDocumenter
                 if (args.Length > 0 && args[0] == "markdown")
                 {
                     retCode = GenerateMarkdown(args);
+                }
+                if (args.Length > 0 && args[0] == "html")
+                {
+                    retCode = GenerateHtml(args);
                 }
                 else
                 {
@@ -39,6 +44,58 @@ namespace OneScriptDocumenter
 
             return retCode;
 
+        }
+
+        private static int GenerateHtml(string[] args)
+        {
+            var cmdLineArgs = new CommandLineArgs(args);
+            cmdLineArgs.Next(); // пропуск ключевого слова
+
+            var inputDir = cmdLineArgs.Next();
+            if (inputDir == null)
+            {
+                ShowUsage();
+                return 1;
+            }
+
+            if (!Directory.Exists(inputDir))
+            {
+                Console.WriteLine("Input dir doesn't exist");
+                return 2;
+            }
+
+            var outputDir = cmdLineArgs.Next();
+            if (outputDir == null)
+                outputDir = Directory.GetCurrentDirectory();
+
+            inputDir = Path.GetFullPath(inputDir);
+
+            var files = Directory.EnumerateFiles(inputDir, "*.md", SearchOption.AllDirectories)
+                .Select(x=>new {FullPath = x, RelativePath = x.Substring(inputDir.Length+1)});
+
+            Directory.CreateDirectory(outputDir);
+            var mdGen = new MarkdownDeep.Markdown();
+            mdGen.AutoHeadingIDs = true;
+            mdGen.ExtraMode = true;
+
+            foreach (var file in files)
+            {
+                Console.WriteLine("Processing {0}", file.RelativePath);
+                using (var inputFile = new StreamReader(file.FullPath))
+                {
+                    var content = inputFile.ReadToEnd();
+                    var html = mdGen.Transform(content);
+                    var outputFile = Path.Combine(outputDir, file.RelativePath.Substring(0, file.RelativePath.Length-2)+"htm");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
+
+                    using (var outStream = new StreamWriter(outputFile, false, Encoding.UTF8))
+                    {
+                        outStream.Write(html);
+                    }
+                }
+            }
+            Console.WriteLine("Done");
+            return 0;
         }
 
         private static int GenerateXml(string[] args)
@@ -180,6 +237,7 @@ namespace OneScriptDocumenter
             Console.WriteLine("Usage:");
             Console.WriteLine("documenter.exe <output-file> <path-to-dll> [<path-to-dll>...]");
             Console.WriteLine("documenter.exe markdown <path-to-xml> <output-dir>");
+            Console.WriteLine("documenter.exe html <markdown-dir> <output-dir>");
         }
 
     }
