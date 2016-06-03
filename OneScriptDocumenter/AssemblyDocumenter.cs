@@ -154,8 +154,37 @@ namespace OneScriptDocumenter
             if (methParams.Length > 0)
             {
                 sb.Append('(');
-                var paramInfos = methParams.Select(x => x.ParameterType.FullName);
-                sb.Append(string.Join(",", paramInfos));
+                var paramInfos = methParams.Select(x => x.ParameterType).ToArray();
+                string[] paramTypeNames = new string[paramInfos.Length];
+
+                for (int i = 0; i < paramInfos.Length; i++)
+                {
+                    var info = paramInfos[i];
+                    if (info.GenericTypeArguments.Length > 0)
+                    {
+                        var matches = System.Text.RegularExpressions.Regex.Matches(info.FullName, @"([\w.]+)`\d|(\[([\w0-9.=]+)(?:,\s(?:[\w0-9.= ]+))*\]),?");
+
+                        var genericBuilder = new StringBuilder();
+                        genericBuilder.Append(matches[0].Groups[1].ToString());
+                        genericBuilder.Append('{');
+                        bool fst = true;
+                        foreach (var capture in matches[1].Groups[3].Captures)
+                        {
+                            if (!fst)
+                                genericBuilder.Append(", ");
+
+                            genericBuilder.Append(capture.ToString());
+                            fst = false;
+                        }
+                        genericBuilder.Append('}');
+                        paramTypeNames[i] = genericBuilder.ToString();
+                    }
+                    else
+                    {
+                        paramTypeNames[i] = info.FullName;
+                    }
+                }
+                sb.Append(string.Join(",", paramTypeNames));
                 sb.Append(')');
             }
             return sb.ToString();
