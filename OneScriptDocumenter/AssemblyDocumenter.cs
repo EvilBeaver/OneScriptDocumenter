@@ -17,7 +17,7 @@ namespace OneScriptDocumenter
         XDocument _xmlDoc;
         Dictionary<string, XElement> _memberDocumentation = new Dictionary<string, XElement>();
 
-        TypesDictinary _typesDict;
+        TypesDictionary _typesDict;
 
         public AssemblyDocumenter()
         { }
@@ -37,7 +37,7 @@ namespace OneScriptDocumenter
 
             // add to dictinary
 
-            _typesDict = new TypesDictinary();
+            _typesDict = new TypesDictionary();
 
 
             // Пока топорное заполнение...

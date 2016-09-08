@@ -75,7 +75,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptMemberTypes.cs" />
-    <Compile Include="TypesDictinary.cs" />
+    <Compile Include="TypesDictionary.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -15,11 +15,11 @@ namespace OneScriptDocumenter
         public string nameRus = "";
     }
 
-    class TypesDictinary
+    class TypesDictionary
     {
         List<TypeInfo> list;
 
-        public TypesDictinary()
+        public TypesDictionary()
         {
             if (System.IO.File.Exists(@"map.json"))
             {
