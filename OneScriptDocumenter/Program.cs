@@ -27,6 +27,10 @@ namespace OneScriptDocumenter
                 {
                     retCode = GenerateHtml(args);
                 }
+                else if (args.Length > 0 && args[0] == "json")
+                {
+                    retCode = GenerateJSON(args);
+                }
                 else
                 {
                     retCode = GenerateXml(args);
@@ -113,6 +117,39 @@ namespace OneScriptDocumenter
             }
         }
 
+        private static int GenerateJSON(string[] args)
+        {
+            var cmdLineArgs = new CommandLineArgs(args);
+            cmdLineArgs.Next(); // пропуск ключевого слова
+
+            var outputFile = cmdLineArgs.Next();
+            if (outputFile == null)
+            {
+                ShowUsage();
+                return 1;
+            }
+
+            List<string> assemblies = new List<string>();
+
+            while (true)
+            {
+                var arg = cmdLineArgs.Next();
+                if (arg == null)
+                    break;
+
+                assemblies.Add(arg);
+            }
+
+            if (assemblies.Count == 0)
+            {
+                ShowUsage();
+                return 1;
+            }
+
+            return CreateDocumentationJSON(outputFile, assemblies);
+
+        }
+
         private static int GenerateXml(string[] args)
         {
             var cmdLineArgs = new CommandLineArgs(args);
@@ -176,6 +213,17 @@ namespace OneScriptDocumenter
 
             return 0;
         }
+
+        private static int CreateDocumentationJSON(string outputFile, List<string> assemblies)
+        {
+            var documenter = new Documenter();
+            var doc = documenter.CreateDocumentationJSON(outputFile, assemblies);
+            //var tocWriter = new StreamWriter(outputFile);
+            //    tocWriter.Write(doc);
+
+            return 0;
+        }
+
 
         private static int CreateDocumentation(string xmlDocPath, string pathOutput, string baseUrl)
         {
@@ -253,9 +301,10 @@ namespace OneScriptDocumenter
         static void ShowUsage()
         {
             Console.WriteLine("Usage:");
-            Console.WriteLine("documenter.exe <output-file> <path-to-dll> [<path-to-dll>...]");
-            Console.WriteLine("documenter.exe markdown <path-to-xml> <output-dir> [baseurl]");
-            Console.WriteLine("documenter.exe html <path-to-xml> <output-dir> [baseurl]");
+            Console.WriteLine("OneScriptDocumenter.exe <output-file> <path-to-dll> [<path-to-dll>...]");
+            Console.WriteLine("OneScriptDocumenter.exe json <output-file> <path-to-dll> [<path-to-dll>...]");
+            Console.WriteLine("OneScriptDocumenter.exe markdown <path-to-xml> <output-dir> [baseurl]");
+            Console.WriteLine("OneScriptDocumenter.exe html <path-to-xml> <output-dir> [baseurl]");
         }
 
     }

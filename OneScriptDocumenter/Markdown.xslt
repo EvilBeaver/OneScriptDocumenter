@@ -17,7 +17,7 @@
   
   <xsl:template match="context">
     <document href="{./name}.md">
-#<xsl:value-of select="./name"/> / <xsl:value-of select="./alias"/>
+# <xsl:value-of select="./name"/> / <xsl:value-of select="./alias"/>
       <xsl:text>
 </xsl:text>
       <xsl:apply-templates/>
@@ -26,18 +26,18 @@
   
   <xsl:template match="global-context">
     <document href="{./category}.md">
-#<xsl:value-of select="./category"/>
+# <xsl:value-of select="./category"/>
       <xsl:apply-templates/>
     </document>
   </xsl:template>
 
   <xsl:template match="properties">
-##Свойства
+## Свойства
     <xsl:apply-templates/>
   </xsl:template>
 
   <xsl:template match="property">
-###<xsl:value-of select="./name"/> / <xsl:value-of select="./alias"/>
+### <xsl:value-of select="./name"/> / <xsl:value-of select="./alias"/>
     <xsl:text>
 Доступ: </xsl:text>
     <xsl:choose>
@@ -46,21 +46,28 @@
       <xsl:when test="./readable/text() = 'false' and ./writeable/text() = 'true'">Запись</xsl:when>
       <xsl:otherwise>Недоступно</xsl:otherwise>
     </xsl:choose>
+    <xsl:if test="string-length(value)">
+      <xsl:text>
+
+Тип значения: </xsl:text>
+      <xsl:value-of select="./value"/>
+    </xsl:if>
     <xsl:apply-templates/>
   </xsl:template>
-
+  
+  
   <xsl:template match="methods">
-##Методы
+## Методы
     <xsl:apply-templates/>
   </xsl:template>
 
   <xsl:template match="method">
-###<xsl:value-of select="./name"/> / <xsl:value-of select="./alias"/>()
+### <xsl:value-of select="./name"/> / <xsl:value-of select="./alias"/>()
     <xsl:apply-templates/>
     <xsl:call-template name="parameters-writeout"/>
     <xsl:if test="count(./returns) > 0">
       <xsl:text>
-####Возвращаемое значение
+#### Возвращаемое значение
 </xsl:text>
       <xsl:apply-templates select="./returns" mode="textVal"/>
     </xsl:if>
@@ -72,7 +79,7 @@
   </xsl:template>
 
   <xsl:template match="example">
-####Пример:
+#### Пример:
 <xsl:apply-templates mode="split"/>
   </xsl:template>
 
@@ -91,13 +98,13 @@
   </xsl:template>
 
   <xsl:template match="constructors">
-##Конструкторы
+## Конструкторы
 
   <xsl:apply-templates/>
   </xsl:template>
 
   <xsl:template match="ctor">
-###<xsl:value-of select="./name"/>
+### <xsl:value-of select="./name"/>
     <xsl:apply-templates/>
     <xsl:call-template name="parameters-writeout"/>
   </xsl:template>
@@ -105,7 +112,7 @@
   <xsl:template name="parameters-writeout">
     <xsl:if test="count(./param) > 0">
       <xsl:text>
-####Параметры
+#### Параметры
 </xsl:text>
       <xsl:for-each select="./param">
 * *<xsl:value-of select="@name"/>*: <xsl:value-of select ="./text()"/>
