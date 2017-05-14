@@ -20,6 +20,16 @@ namespace OneScriptDocumenter
         public AssemblyDocumenter()
         { }
 
+        private static void GetNameAndAlias(CustomAttributeData attrib, string clrName, out string name, out string alias)
+        {
+            name = (string)attrib.ConstructorArguments[0].Value;
+            alias = (string)attrib.ConstructorArguments[1].Value;
+            if (string.IsNullOrEmpty(alias))
+            {
+                alias = clrName;
+            }
+        }
+
         public AssemblyDocumenter(string library, string xmldoc)
         {
             using (var reader = new StreamReader(xmldoc))
@@ -56,8 +66,7 @@ namespace OneScriptDocumenter
                     curTypeInfo.ShortName = cont.Name;
                     if (attrib.ConstructorArguments.Count > 0)
                     {
-                        curTypeInfo.nameEng = (string)attrib.ConstructorArguments[1].Value;
-                        curTypeInfo.nameRus = (string)attrib.ConstructorArguments[0].Value;
+                        GetNameAndAlias(attrib, cont.Name, out curTypeInfo.nameRus, out curTypeInfo.nameEng);
                     }
                     _typesDict.add(curTypeInfo);
                 }
@@ -206,10 +215,13 @@ namespace OneScriptDocumenter
         private void AddEnumsDescriptionJSON(Type sysEnum, DocumentBlocks textBlocks, ScriptMemberType sysType)
         {
             var attrib = _library.GetMarkup(sysEnum, sysType);
-            var childElement = new XElement((string)attrib.ConstructorArguments[0].Value);
 
-            childElement.Add(new XElement("name", (string)attrib.ConstructorArguments[0].Value));
-            childElement.Add(new XElement("name_en", (string)attrib.ConstructorArguments[1].Value == "" ? (string)attrib.ConstructorArguments[0].Value : (string)attrib.ConstructorArguments[1].Value));
+            string name, alias;
+            GetNameAndAlias(attrib, sysEnum.Name, out name, out alias);
+
+            var childElement = new XElement(name);
+            childElement.Add(new XElement("name", name));
+            childElement.Add(new XElement("name_en", alias));
 
             AppendXmlDocsJSON(childElement, "T:" + sysEnum.FullName);
 
@@ -265,8 +277,11 @@ namespace OneScriptDocumenter
             childElement.Add(new XAttribute("clr-name", classType.FullName));
             var attrib = _library.GetMarkup(classType, ScriptMemberType.Class);
 
-            childElement.Add(new XElement("name", (string)attrib.ConstructorArguments[0].Value));
-            childElement.Add(new XElement("alias", (string)attrib.ConstructorArguments[1].Value));
+            string name, alias;
+            GetNameAndAlias(attrib, classType.Name, out name, out alias);
+
+            childElement.Add(new XElement("name", name));
+            childElement.Add(new XElement("alias", alias));
 
             AppendXmlDocs(childElement, "T:" + classType.FullName);
 
@@ -315,10 +330,13 @@ namespace OneScriptDocumenter
         private void AddContextDescriptionJSON(Type classType, DocumentBlocks textBlocks)
         {
             var attrib = _library.GetMarkup(classType, ScriptMemberType.Class);
-            var childElement = new XElement((string)attrib.ConstructorArguments[0].Value);
 
-            childElement.Add(new XElement("name", (string)attrib.ConstructorArguments[0].Value));
-            childElement.Add(new XElement("name_en", (string)attrib.ConstructorArguments[1].Value == "" ? (string)attrib.ConstructorArguments[0].Value : (string)attrib.ConstructorArguments[1].Value));
+            string name, alias;
+            GetNameAndAlias(attrib, classType.Name, out name, out alias);
+
+            var childElement = new XElement(name);
+            childElement.Add(new XElement("name", name));
+            childElement.Add(new XElement("name_en", alias));
 
             AppendXmlDocsJSON(childElement, "T:" + classType.FullName);
 
@@ -345,10 +363,12 @@ namespace OneScriptDocumenter
                 if (attrib != null)
                 {
                     var fullName = classType.FullName + "." + MethodId(meth);
+                    string name, alias;
+                    GetNameAndAlias(attrib, meth.Name, out name, out alias);
                     var element = new XElement("method");
                     element.Add(new XAttribute("clr-name", fullName));
-                    element.Add(new XElement("name", (string)attrib.ConstructorArguments[0].Value));
-                    element.Add(new XElement("alias", (string)attrib.ConstructorArguments[1].Value));
+                    element.Add(new XElement("name", name));
+                    element.Add(new XElement("alias", alias));
 
                     AppendXmlDocs(element, "M:" + fullName);
 
@@ -369,9 +389,11 @@ namespace OneScriptDocumenter
                 if (attrib != null)
                 {
                     var fullName = classType.FullName + "." + MethodId(meth);
-                    var element = new XElement((string)attrib.ConstructorArguments[0].Value);
-                    element.Add(new XElement("name", (string)attrib.ConstructorArguments[0].Value));
-                    element.Add(new XElement("name_en", (string)attrib.ConstructorArguments[1].Value == "" ? (string)attrib.ConstructorArguments[0].Value : (string)attrib.ConstructorArguments[1].Value));
+                    string name, alias;
+                    GetNameAndAlias(attrib, meth.Name, out name, out alias);
+                    var element = new XElement(name);
+                    element.Add(new XElement("name", name));
+                    element.Add(new XElement("name_en", alias));
                     var returns = "";
                     if (meth.ReturnType.FullName != "System.Void")
                     {
@@ -490,9 +512,12 @@ namespace OneScriptDocumenter
                 var attrib = _library.GetMarkup(prop, ScriptMemberType.EnumerationValue);
                 if (attrib != null)
                 {
-                    var propElement = new XElement((string)attrib.ConstructorArguments[0].Value);
-                    propElement.Add(new XElement("name", (string)attrib.ConstructorArguments[0].Value));
-                    propElement.Add(new XElement("name_en", (string)attrib.ConstructorArguments[1].Value == null ? (string)attrib.ConstructorArguments[0].Value : (string)attrib.ConstructorArguments[1].Value));
+                    string name, alias;
+                    GetNameAndAlias(attrib, prop.Name, out name, out alias);
+
+                    var propElement = new XElement(name);
+                    propElement.Add(new XElement("name", name));
+                    propElement.Add(new XElement("name_en", alias));
 
                     AppendXmlDocsJSON(propElement, "P:" + classType.FullName + "." + prop.Name);
                     propElementCollection.Add(propElement);
@@ -504,9 +529,12 @@ namespace OneScriptDocumenter
                 var attrib = _library.GetMarkup(field, ScriptMemberType.EnumItem);
                 if (attrib != null)
                 {
-                    var propElement = new XElement((string)attrib.ConstructorArguments[0].Value);
-                    propElement.Add(new XElement("name", (string)attrib.ConstructorArguments[0].Value));
-                    propElement.Add(new XElement("name_en", (string)attrib.ConstructorArguments[1].Value == null ? (string)attrib.ConstructorArguments[0].Value : (string)attrib.ConstructorArguments[1].Value));
+                    string name, alias;
+                    GetNameAndAlias(attrib, field.Name, out name, out alias);
+
+                    var propElement = new XElement(name);
+                    propElement.Add(new XElement("name", name));
+                    propElement.Add(new XElement("name_en", alias));
 
                     AppendXmlDocsJSON(propElement, "P:" + classType.FullName + "." + field.Name);
                     propElementCollection.Add(propElement);
@@ -546,9 +574,11 @@ namespace OneScriptDocumenter
         private XElement fillPropElement(System.Reflection.PropertyInfo prop, System.Reflection.CustomAttributeData attrib, Type classType)
         {
             var propElement = new XElement("property");
+            string name, alias;
+            GetNameAndAlias(attrib, prop.Name, out name, out alias);
             propElement.Add(new XAttribute("clr-name", classType.FullName + "." + prop.Name));
-            propElement.Add(new XElement("name", (string)attrib.ConstructorArguments[0].Value));
-            propElement.Add(new XElement("alias", (string)attrib.ConstructorArguments[1].Value));
+            propElement.Add(new XElement("name", name));
+            propElement.Add(new XElement("alias", alias));
 
             var access = findAccess(attrib, prop);
 
@@ -596,9 +626,11 @@ namespace OneScriptDocumenter
 
         private XElement fillPropElementJSON(System.Reflection.PropertyInfo prop, System.Reflection.CustomAttributeData attrib, Type classType)
         {
-            var propElement = new XElement((string)attrib.ConstructorArguments[0].Value);
-            propElement.Add(new XElement("name", (string)attrib.ConstructorArguments[0].Value));
-            propElement.Add(new XElement("name_en", (string)attrib.ConstructorArguments[1].Value == "" ? (string)attrib.ConstructorArguments[0].Value : (string)attrib.ConstructorArguments[1].Value));
+            string name, alias;
+            GetNameAndAlias(attrib, prop.Name, out name, out alias);
+            var propElement = new XElement(name);
+            propElement.Add(new XElement("name", name));
+            propElement.Add(new XElement("name_en", alias));
 
             var access = findAccess(attrib, prop);
 
