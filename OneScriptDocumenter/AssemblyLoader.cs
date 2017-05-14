@@ -30,6 +30,13 @@ namespace OneScriptDocumenter
 
             var scriptEngineLib = Assembly.ReflectionOnlyLoadFrom(engineFile);
 
+            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (object sender, ResolveEventArgs args) =>
+            {
+                var data = args.Name.Split(',');
+                var filename = Path.Combine(_baseDirectory, data[0] + ".dll");
+                return Assembly.ReflectionOnlyLoadFrom(filename);
+            };
+
             _classAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ContextClassAttribute", true);
             _globalContextAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.GlobalContextAttribute", true);
             _methodAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ContextMethodAttribute", true);
@@ -39,6 +46,15 @@ namespace OneScriptDocumenter
             _systemValue = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.EnumValueAttribute", true);
             _enumerationTypeAttribute = scriptEngineLib.GetType("ScriptEngine.EnumerationTypeAttribute", true);
             _enumValue = scriptEngineLib.GetType("ScriptEngine.EnumItemAttribute", true);
+
+            foreach (var name in new string[] { "ScriptEngine.HostedScript", "DotNetZip", "Newtonsoft.Json" })
+            {
+                var libFile = Path.Combine(_baseDirectory, name + ".dll");
+                if (File.Exists(libFile))
+                {
+                    Assembly.ReflectionOnlyLoadFrom(libFile);
+                }
+            }
         }
 
         public LoadedAssembly Load(string assemblyName)
@@ -50,13 +66,14 @@ namespace OneScriptDocumenter
 
             foreach (var lib in scriptEngineLibs)
             {
+                Assembly asm;
                 try
                 {
-                    Assembly.ReflectionOnlyLoad(lib.FullName);
+                    asm = Assembly.ReflectionOnlyLoad(lib.FullName);
                 }
                 catch (FileNotFoundException)
                 {
-                    Assembly.ReflectionOnlyLoadFrom(Path.Combine(_baseDirectory, lib.Name + ".dll"));
+                    asm = Assembly.ReflectionOnlyLoadFrom(Path.Combine(_baseDirectory, lib.Name + ".dll"));
                 }
             }
 
