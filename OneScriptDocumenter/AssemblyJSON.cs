@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace OneScriptDocumenter
@@ -107,13 +105,14 @@ namespace OneScriptDocumenter
 
         private static void OutputNode(string childname, object alChild, StringBuilder sbJSON, bool showNodeName)
         {
+            var stringChild = alChild as string;
             if (alChild == null)
             {
                 if (showNodeName)
                     sbJSON.Append("\"" + SafeJSON(childname) + "\": ");
                 sbJSON.Append("null");
             }
-            else if (alChild is string)
+            else if (stringChild != null)
             {
                 if (showNodeName)
                     sbJSON.Append("\"" + SafeJSON(childname) + "\": ");
@@ -138,7 +137,7 @@ namespace OneScriptDocumenter
                     sbOut.Append(@"\u" + ich.ToString("x4"));
                     continue;
                 }
-                else if (ch == '\"' || ch == '\\' )
+                else if (ch == '\"' || ch == '\\')
                 {
                     sbOut.Append('\\');
                 }

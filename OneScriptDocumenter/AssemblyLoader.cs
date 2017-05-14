@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OneScriptDocumenter
 {
@@ -15,6 +12,10 @@ namespace OneScriptDocumenter
         readonly Type _propAttributeType;
         readonly Type _constructorAttributeType;
         readonly Type _globalContextAttributeType;
+        readonly Type _systemEnumAttribute;
+        readonly Type _enumerationTypeAttribute;
+        readonly Type _systemValue;
+        readonly Type _enumValue;
 
         readonly string _baseDirectory;
 
@@ -34,6 +35,10 @@ namespace OneScriptDocumenter
             _methodAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ContextMethodAttribute", true);
             _propAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ContextPropertyAttribute", true);
             _constructorAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ScriptConstructorAttribute", true);
+            _systemEnumAttribute = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.SystemEnumAttribute", true);
+            _systemValue = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.EnumValueAttribute", true);
+            _enumerationTypeAttribute = scriptEngineLib.GetType("ScriptEngine.EnumerationTypeAttribute", true);
+            _enumValue = scriptEngineLib.GetType("ScriptEngine.EnumItemAttribute", true);
         }
 
         public LoadedAssembly Load(string assemblyName)
@@ -49,7 +54,7 @@ namespace OneScriptDocumenter
                 {
                     Assembly.ReflectionOnlyLoad(lib.FullName);
                 }
-                catch(FileNotFoundException)
+                catch (FileNotFoundException)
                 {
                     Assembly.ReflectionOnlyLoadFrom(Path.Combine(_baseDirectory, lib.Name + ".dll"));
                 }
@@ -72,6 +77,14 @@ namespace OneScriptDocumenter
                     return _methodAttributeType;
                 case ScriptMemberType.Property:
                     return _propAttributeType;
+                case ScriptMemberType.SystemEnum:
+                    return _systemEnumAttribute;
+                case ScriptMemberType.EnumerationType:
+                    return _enumerationTypeAttribute;
+                case ScriptMemberType.EnumerationValue:
+                    return _systemValue;
+                case ScriptMemberType.EnumItem:
+                    return _enumValue;
                 default:
                     throw new ArgumentException("Unsupported member type");
             }

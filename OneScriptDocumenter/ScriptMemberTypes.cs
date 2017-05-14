@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OneScriptDocumenter
+﻿namespace OneScriptDocumenter
 {
     enum ScriptMemberType
     {
         GlobalContext,
+        SystemEnum,
+        EnumerationType,
+        EnumerationValue,
+        EnumItem,
         Class,
         Method,
         Property,

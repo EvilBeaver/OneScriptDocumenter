@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OneScriptDocumenter
 {
     class LoadedAssembly
     {
-        private Assembly _library;
-        private AssemblyLoader _assemblyLoader;
+        private readonly Assembly _library;
+        private readonly AssemblyLoader _assemblyLoader;
 
         private Type[] _allTypes;
 
@@ -32,7 +29,7 @@ namespace OneScriptDocumenter
         {
             get
             {
-                if(_allTypes == null)
+                if (_allTypes == null)
                     _allTypes = _library.GetTypes();
 
                 return _allTypes;

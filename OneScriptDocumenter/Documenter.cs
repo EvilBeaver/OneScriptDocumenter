@@ -1,13 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace OneScriptDocumenter
 {
+    class DocumentBlocks
+    {
+        public StringBuilder TextGlobalContext;
+        public StringBuilder TextContextDescription;
+        public StringBuilder TextEnumsDescription;
+
+        public DocumentBlocks()
+        {
+            TextGlobalContext = new StringBuilder();
+            TextContextDescription = new StringBuilder();
+            TextEnumsDescription = new StringBuilder();
+        }
+    }
+
     class Documenter
     {
         internal XDocument CreateDocumentation(List<string> assemblies)
@@ -28,7 +40,7 @@ namespace OneScriptDocumenter
 
                 var docMaker = new AssemblyDocumenter(assembly, xmlName);
                 var asmDoc = docMaker.CreateDocumentation();
-                result.Root.Add(new XElement("assembly", 
+                result.Root.Add(new XElement("assembly",
                     new XAttribute("name", name),
                     asmDoc.Root));
             }
@@ -37,12 +49,10 @@ namespace OneScriptDocumenter
         }
         internal string CreateDocumentationJSON(string pathOutput, List<string> assemblies)
         {
-            XDocument result = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), new XElement("oscript-docs"));
-            //StringBuilder sbJSON = new StringBuilder();
             using (StreamWriter sbJSON = new StreamWriter(pathOutput))
             {
-                sbJSON.WriteLine("export function globalContext(): any {");
-                sbJSON.WriteLine("let data = ");
+
+                DocumentBlocks textBlocks = new DocumentBlocks();
 
                 foreach (var assembly in assemblies)
                 {
@@ -57,8 +67,21 @@ namespace OneScriptDocumenter
                     Console.WriteLine("Processing: {0}", name);
 
                     var docMaker = new AssemblyDocumenter(assembly, xmlName);
-                    docMaker.CreateDocumentationJSON(sbJSON);
+                    docMaker.CreateDocumentationJSON(textBlocks);
                 }
+
+                sbJSON.WriteLine("export function globalContextOscript(): any {\nconst data = {");
+                sbJSON.WriteLine(textBlocks.TextGlobalContext);
+                sbJSON.WriteLine("    };\n    return data;\n}\n\nexport function classesOscript(): any {\nconst data = {");
+
+
+                sbJSON.WriteLine(textBlocks.TextContextDescription);
+
+                sbJSON.WriteLine("    };\n    return data;\n}\n\nexport function systemEnum(): any {\nconst data = {");
+
+                sbJSON.WriteLine(textBlocks.TextEnumsDescription);
+                sbJSON.WriteLine("    };\n    return data;\n}");
+
                 Console.WriteLine("Done");
                 return "";
             }
