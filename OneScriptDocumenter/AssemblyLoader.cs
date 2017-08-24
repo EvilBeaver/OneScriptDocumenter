@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -34,6 +35,14 @@ namespace OneScriptDocumenter
             _methodAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ContextMethodAttribute", true);
             _propAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ContextPropertyAttribute", true);
             _constructorAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ScriptConstructorAttribute", true);
+
+            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += CurrentDomain_ReflectionOnlyAssemblyResolve;
+
+        }
+
+        private Assembly CurrentDomain_ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            return Assembly.ReflectionOnlyLoad(args.Name);
         }
 
         public LoadedAssembly Load(string assemblyName)
