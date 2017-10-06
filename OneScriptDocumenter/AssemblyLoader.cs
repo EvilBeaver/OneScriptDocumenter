@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OneScriptDocumenter
 {
@@ -16,6 +14,10 @@ namespace OneScriptDocumenter
         readonly Type _propAttributeType;
         readonly Type _constructorAttributeType;
         readonly Type _globalContextAttributeType;
+        readonly Type _systemEnumAttribute;
+        readonly Type _enumerationTypeAttribute;
+        readonly Type _systemValue;
+        readonly Type _enumValue;
 
         readonly string _baseDirectory;
 
@@ -30,11 +32,31 @@ namespace OneScriptDocumenter
 
             var scriptEngineLib = Assembly.ReflectionOnlyLoadFrom(engineFile);
 
+            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (object sender, ResolveEventArgs args) =>
+            {
+                var data = args.Name.Split(',');
+                var filename = Path.Combine(_baseDirectory, data[0] + ".dll");
+                return Assembly.ReflectionOnlyLoadFrom(filename);
+            };
+
             _classAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ContextClassAttribute", true);
             _globalContextAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.GlobalContextAttribute", true);
             _methodAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ContextMethodAttribute", true);
             _propAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ContextPropertyAttribute", true);
             _constructorAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ScriptConstructorAttribute", true);
+            _systemEnumAttribute = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.SystemEnumAttribute", true);
+            _systemValue = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.EnumValueAttribute", true);
+            _enumerationTypeAttribute = scriptEngineLib.GetType("ScriptEngine.EnumerationTypeAttribute", true);
+            _enumValue = scriptEngineLib.GetType("ScriptEngine.EnumItemAttribute", true);
+
+            foreach (var name in new string[] { "ScriptEngine.HostedScript", "DotNetZip", "Newtonsoft.Json" })
+            {
+                var libFile = Path.Combine(_baseDirectory, name + ".dll");
+                if (File.Exists(libFile))
+                {
+                    Assembly.ReflectionOnlyLoadFrom(libFile);
+                }
+            }
 
             AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += CurrentDomain_ReflectionOnlyAssemblyResolve;
 
@@ -54,13 +76,14 @@ namespace OneScriptDocumenter
 
             foreach (var lib in scriptEngineLibs)
             {
+                Assembly asm;
                 try
                 {
-                    Assembly.ReflectionOnlyLoad(lib.FullName);
+                    asm = Assembly.ReflectionOnlyLoad(lib.FullName);
                 }
-                catch(FileNotFoundException)
+                catch (FileNotFoundException)
                 {
-                    Assembly.ReflectionOnlyLoadFrom(Path.Combine(_baseDirectory, lib.Name + ".dll"));
+                    asm = Assembly.ReflectionOnlyLoadFrom(Path.Combine(_baseDirectory, lib.Name + ".dll"));
                 }
             }
 
@@ -81,6 +104,14 @@ namespace OneScriptDocumenter
                     return _methodAttributeType;
                 case ScriptMemberType.Property:
                     return _propAttributeType;
+                case ScriptMemberType.SystemEnum:
+                    return _systemEnumAttribute;
+                case ScriptMemberType.EnumerationType:
+                    return _enumerationTypeAttribute;
+                case ScriptMemberType.EnumerationValue:
+                    return _systemValue;
+                case ScriptMemberType.EnumItem:
+                    return _enumValue;
                 default:
                     throw new ArgumentException("Unsupported member type");
             }

@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace OneScriptDocumenter
 {
-    class Program
+    static class Program
     {
         static int Main(string[] args)
         {
@@ -72,13 +72,12 @@ namespace OneScriptDocumenter
             Directory.CreateDirectory(inputDir);
 
             CreateDocumentation(xmlDoc, inputDir, baseUrl);
-            
+
             var files = Directory.EnumerateFiles(inputDir, "*.md", SearchOption.AllDirectories)
-                .Select(x=>new {FullPath = x, RelativePath = x.Substring(inputDir.Length+1)});
+                .Select(x => new { FullPath = x, RelativePath = x.Substring(inputDir.Length + 1) });
 
             Directory.CreateDirectory(outputDir);
             var mdGen = new MarkdownGen();
-            //mdGen.AutoHeadingIDs = true;
             mdGen.ExtraMode = true;
             mdGen.UrlBaseLocation = "stdlib";
 
@@ -90,8 +89,8 @@ namespace OneScriptDocumenter
                 using (var inputFile = new StreamReader(file.FullPath))
                 {
                     var content = inputFile.ReadToEnd();
-                    var outputFile = Path.Combine(outputDir, file.RelativePath.Substring(0, file.RelativePath.Length-2)+"htm");
-                    
+                    var outputFile = Path.Combine(outputDir, file.RelativePath.Substring(0, file.RelativePath.Length - 2) + "htm");
+
                     var html = mdGen.Transform(content);
                     Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
 
@@ -188,7 +187,7 @@ namespace OneScriptDocumenter
             cmdLineArgs.Next(); // пропуск ключевого слова
 
             var xmlDoc = cmdLineArgs.Next();
-            if(xmlDoc == null)
+            if (xmlDoc == null)
             {
                 ShowUsage();
                 return 1;
@@ -217,13 +216,10 @@ namespace OneScriptDocumenter
         private static int CreateDocumentationJSON(string outputFile, List<string> assemblies)
         {
             var documenter = new Documenter();
-            var doc = documenter.CreateDocumentationJSON(outputFile, assemblies);
-            //var tocWriter = new StreamWriter(outputFile);
-            //    tocWriter.Write(doc);
+            documenter.CreateDocumentationJSON(outputFile, assemblies);
 
             return 0;
         }
-
 
         private static int CreateDocumentation(string xmlDocPath, string pathOutput, string baseUrl)
         {
@@ -232,16 +228,16 @@ namespace OneScriptDocumenter
             {
                 doc = XDocument.Load(fs);
             }
-            
+
             string docContent = doc.ToString();
 
-            XslTransform xslt = new XslTransform();
+            XslCompiledTransform xslt = new XslCompiledTransform();
             xslt.Load(ExtFiles.Get("markdown.xslt"));
             XPathDocument xpathdocument = new XPathDocument(new StringReader(docContent));
 
             var stream = new MemoryStream();
             XmlTextWriter writer = new XmlTextWriter(stream, Encoding.UTF8);
-                
+
             xslt.Transform(xpathdocument, null, writer, null);
 
             stream.Position = 0;
@@ -253,7 +249,7 @@ namespace OneScriptDocumenter
 
             var contentStdlibPath = Path.Combine(pathOutput, "stdlib");
             Directory.CreateDirectory(contentStdlibPath);
-            
+
             var tocBuilder = new StringBuilder();
             var knownNodes = new HashSet<string>();
             if (baseUrl == null)
@@ -281,9 +277,9 @@ namespace OneScriptDocumenter
                 {
                     string name = fileNode.Attribute("href").Value.Replace(".md", "");
                     string link = name.Replace(" ", "%20");
-                    
+
                     string path = Path.Combine(contentStdlibPath, fileNode.Attribute("href").Value);
-                    using (var file = new FileStream(path, FileMode.Create))
+                    var file = new FileStream(path, FileMode.Create);
                     using (var fileWriter = new StreamWriter(file))
                     {
                         fileWriter.Write(fileNode.Value);

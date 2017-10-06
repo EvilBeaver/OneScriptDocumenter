@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OneScriptDocumenter.Model
 {
@@ -10,7 +7,7 @@ namespace OneScriptDocumenter.Model
     {
         public const string DEFAULT_LANG = "ru";
 
-        private Dictionary<string, string> _variants = new Dictionary<string,string>();
+        private readonly Dictionary<string, string> _variants = new Dictionary<string,string>();
 
         public MultilangString(string content)
         {

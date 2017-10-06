@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace OneScriptDocumenter
@@ -17,7 +13,7 @@ namespace OneScriptDocumenter
 
     class TypesDictionary
     {
-        List<TypeInfo> list;
+        readonly List<TypeInfo> list;
 
         public TypesDictionary()
         {
@@ -35,7 +31,7 @@ namespace OneScriptDocumenter
         public TypeInfo findByFullName(string fullName)
         {
 
-            foreach(TypeInfo curType in list)
+            foreach (TypeInfo curType in list)
             {
                 if (curType.fullName == fullName)
                 {
