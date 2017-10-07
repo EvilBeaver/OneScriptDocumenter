@@ -111,7 +111,7 @@ namespace OneScriptDocumenter
         {
             var asmElement = _xmlDoc.Root.Element("assembly");
             if (asmElement == null)
-                throw new ArgumentNullException("Wrong XML doc format");
+                throw new ArgumentException("Wrong XML doc format");
 
             var libName = _library.Name;
             var fileLibName = asmElement.Element("name").Value;
@@ -148,7 +148,7 @@ namespace OneScriptDocumenter
 
             var asmElement = _xmlDoc.Root.Element("assembly");
             if (asmElement == null)
-                throw new ArgumentNullException("Wrong XML doc format");
+                throw new ArgumentException("Wrong XML doc format");
 
             var libName = _library.Name;
             var fileLibName = asmElement.Element("name").Value;
@@ -163,11 +163,6 @@ namespace OneScriptDocumenter
                 _memberDocumentation[key] = item;
             }
 
-            //TODO: правильно обработать
-            //string outline = "export function globalContextOscript(): any {\nconst data = {";
-            //if (_library.Name == "ScriptEngine.HostedScript")
-            //    sbJSON.WriteLine(outline);
-
             var globalContexts = _library.GetMarkedTypes(ScriptMemberType.GlobalContext);
             foreach (var globalContext in globalContexts)
             {
@@ -178,25 +173,15 @@ namespace OneScriptDocumenter
                 using (var layout = new StreamReader(ExtFiles.Get("BasicMethods.json")))
                 {
                     var content = layout.ReadToEnd();
-                    //sbJSON.WriteLine(content);
-                    textBlocks.TextGlobalContext.Append(content);
+                    textBlocks.TextGlobalContext.Append(content.Substring(1, content.Length - 2));
                 }
             }
-            //TODO: правильно обработать
-            //outline = "    };\n    return data;\n}\n\nexport function classesOscript(): any {const data = {";
-            //if (_library.Name == "ScriptEngine.HostedScript")
-            //    sbJSON.WriteLine(outline);
 
             var contextTypes = _library.GetMarkedTypes(ScriptMemberType.Class);
             foreach (var classType in contextTypes)
             {
                 AddContextDescriptionJSON(classType, textBlocks);
             }
-
-            //TODO: правильно обработать
-            //outline = "    };\n    return data;\n}";
-            //if (_library.Name == "ScriptEngine.HostedScript")
-            //    sbJSON.WriteLine(outline);
 
             var systemEnums = _library.GetMarkedTypes(ScriptMemberType.SystemEnum);
             foreach (var systemEnum in systemEnums)
@@ -229,11 +214,10 @@ namespace OneScriptDocumenter
 
             var JSONNode = JSon.XmlToJSON(childElement.ToString());
 
-            //sbJSON.WriteLine(JSONNode.Substring(1, JSONNode.Length - 2) + ",");
             textBlocks.TextEnumsDescription.Append(JSONNode.Substring(1, JSONNode.Length - 2) + ",");
         }
 
-        private void AddGlobalContextDescription(Type globalContext, XElement xElement)
+        private void AddGlobalContextDescription(Type globalContext, XContainer xElement)
         {
 
             var childElement = new XElement("global-context");
@@ -270,7 +254,7 @@ namespace OneScriptDocumenter
             xElement.Add(childElement);
         }
 
-        private void AddContextDescription(Type classType, XElement xElement)
+        private void AddContextDescription(Type classType, XContainer xElement)
         {
             var childElement = new XElement("context");
 
@@ -307,24 +291,23 @@ namespace OneScriptDocumenter
                 {
                     var categoryMember = attrib.NamedArguments.First(x => x.MemberName == "Category");
                     categoryName = (string)categoryMember.TypedValue.Value;
+                    var childElement = new XElement(categoryName.Replace(" ", "_"));
+
+                    AppendXmlDocsJSON(childElement, "T:" + globalContext.FullName);
+
+                    AddProperties(globalContext, childElement, "JSON");
+                    AddMethodsJSON(globalContext, childElement);
+
+                    var JSONNode = JSon.XmlToJSON(childElement.ToString());
+                    var separatorPos = JSONNode.IndexOf(":", StringComparison.InvariantCulture);
+                    JSONNode = JSONNode.Substring(0, separatorPos).Replace("_", " ") + JSONNode.Substring(separatorPos);
+                    textBlocks.TextGlobalContext.Append(JSONNode.Substring(1, JSONNode.Length - 2) + ",");
                 }
             }
             catch (InvalidOperationException)
             {
                 return;
             }
-            var childElement = new XElement(categoryName.Replace(" ", "_"));
-
-            AppendXmlDocsJSON(childElement, "T:" + globalContext.FullName);
-
-            AddProperties(globalContext, childElement, "JSON");
-            AddMethodsJSON(globalContext, childElement);
-
-            var JSONNode = JSon.XmlToJSON(childElement.ToString());
-            var separatorPos = JSONNode.IndexOf(":", StringComparison.InvariantCulture);
-            JSONNode = JSONNode.Substring(0, separatorPos).Replace("_", " ") + JSONNode.Substring(separatorPos);
-            //sbJSON.WriteLine(JSONNode.Substring(1, JSONNode.Length - 2) + ",");
-            textBlocks.TextGlobalContext.Append(JSONNode.Substring(1, JSONNode.Length - 2) + ",");
         }
 
         private void AddContextDescriptionJSON(Type classType, DocumentBlocks textBlocks)
@@ -349,11 +332,10 @@ namespace OneScriptDocumenter
             if (separatorPos > 0)
                 JSONNode = JSONNode.Substring(0, separatorPos) + JSONNode.Substring(separatorPos).Replace("_", " ");
 
-            //sbJSON.WriteLine(JSONNode.Substring(1, JSONNode.Length - 2) + ",");
             textBlocks.TextContextDescription.Append(JSONNode.Substring(1, JSONNode.Length - 2) + ",");
         }
 
-        private void AddMethods(Type classType, XElement childElement)
+        private void AddMethods(Type classType, XContainer childElement)
         {
             var collection = new XElement("methods");
             var methodArray = classType.GetMethods();
@@ -379,7 +361,7 @@ namespace OneScriptDocumenter
             childElement.Add(collection);
         }
 
-        private void AddMethodsJSON(Type classType, XElement childElement)
+        private void AddMethodsJSON(Type classType, XContainer childElement)
         {
             var collection = new XElement("methods");
             var methodArray = classType.GetMethods();
@@ -400,7 +382,7 @@ namespace OneScriptDocumenter
                         returns = SetRusNames(meth.ReturnType.FullName, false);
                         if (returns != "") returns = ": " + returns;
                     }
-                    element.Add(new XElement("signature", "(" + MethodIdJSON(meth, false) + ") " + returns));
+                    element.Add(new XElement("signature", "(" + MethodIdJSON(meth, false) + ")" + returns));
                     AppendXmlDocsJSON(element, "M:" + fullName);
 
                     collection.Add(element);
@@ -411,7 +393,7 @@ namespace OneScriptDocumenter
                 childElement.Add(collection);
         }
 
-        private string MethodId(MethodInfo meth)
+        private string MethodId(MethodBase meth)
         {
             var sb = new StringBuilder();
             sb.Append(meth.Name);
@@ -502,7 +484,7 @@ namespace OneScriptDocumenter
             return sb.ToString();
         }
 
-        private void AddValues(Type classType, XElement childElement)
+        private void AddValues(Type classType, XContainer childElement)
         {
             var propElementCollection = new XElement("values");
 
@@ -545,7 +527,7 @@ namespace OneScriptDocumenter
                 childElement.Add(propElementCollection);
         }
 
-        private void AddProperties(Type classType, XElement childElement, string mode = "")
+        private void AddProperties(Type classType, XContainer childElement, string mode = "")
         {
             var propElementCollection = new XElement("properties");
 
@@ -639,13 +621,13 @@ namespace OneScriptDocumenter
             return propElement;
         }
 
-        private void buildAccessProperty(bool? canRead, bool? canWrite, XElement propElement)
+        private void buildAccessProperty(bool? canRead, bool? canWrite, XContainer propElement)
         {
             var access = ((bool)canRead && (bool)canWrite) ? "Чтение/Запись" : (bool)canRead ? "Чтение" : "Запись";
             propElement.Add(new XElement("access", access));
         }
 
-        private void AddConstructors(Type classType, XElement childElement)
+        private void AddConstructors(Type classType, XContainer childElement)
         {
 
             int itemsCount = 0;
@@ -661,7 +643,7 @@ namespace OneScriptDocumenter
                     var element = new XElement("ctor");
                     element.Add(new XAttribute("clr-name", fullName));
 
-                    var namedArgsName = attrib.NamedArguments.Where(x => x.MemberName == "Name").FirstOrDefault();
+                    var namedArgsName = attrib.NamedArguments.FirstOrDefault(x => x.MemberName == "Name");
                     if (namedArgsName.MemberInfo == null)
                     {
                         element.Add(new XElement("name", "По умолчанию"));
@@ -683,7 +665,7 @@ namespace OneScriptDocumenter
                 childElement.Add(collection);
         }
 
-        private void AddConstructorsJSON(Type classType, XElement childElement)
+        private void AddConstructorsJSON(Type classType, XContainer childElement)
         {
 
             int itemsCount = 0;
@@ -697,7 +679,7 @@ namespace OneScriptDocumenter
                 {
                     var fullName = classType.FullName + "." + MethodId(meth);
                     var ctorName = "По умолчанию";
-                    var namedArgsName = attrib.NamedArguments.Where(x => x.MemberName == "Name").FirstOrDefault();
+                    var namedArgsName = attrib.NamedArguments.FirstOrDefault(x => x.MemberName == "Name");
                     if (namedArgsName.MemberInfo != null)
                     {
                         ctorName = (string)namedArgsName.TypedValue.Value;
@@ -716,7 +698,7 @@ namespace OneScriptDocumenter
                 childElement.Add(collection);
         }
 
-        private void AppendXmlDocs(XElement element, string memberName)
+        private void AppendXmlDocs(XContainer element, string memberName)
         {
             XElement xDoc;
             if (_memberDocumentation.TryGetValue(memberName, out xDoc))
@@ -761,7 +743,7 @@ namespace OneScriptDocumenter
             }
         }
 
-        private void AppendXmlDocsJSON(XElement element, string memberName)
+        private void AppendXmlDocsJSON(XContainer element, string memberName)
         {
             XElement xDoc;
             if (_memberDocumentation.TryGetValue(memberName, out xDoc))
@@ -791,7 +773,7 @@ namespace OneScriptDocumenter
             }
         }
 
-        private void ProcessChildNodes(XElement dest, XElement source)
+        private void ProcessChildNodes(XContainer dest, XElement source)
         {
             var nodes = source.Nodes();
             StringBuilder textContent = new StringBuilder();
@@ -818,7 +800,7 @@ namespace OneScriptDocumenter
                 dest.Add(textContent.ToString());
         }
 
-        private void ProcessChildNodesJSON(XElement dest, XElement source)
+        private void ProcessChildNodesJSON(XContainer dest, XElement source)
         {
             var nodes = source.Nodes();
             StringBuilder textContent = new StringBuilder();

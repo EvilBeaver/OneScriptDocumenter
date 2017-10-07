@@ -1,4 +1,5 @@
 OneScriptDocumenter/bin/Debug/Markdown.xslt
 *.exe
+.vs
 OneScriptDocumenter/bin/
 OneScriptDocumenter/obj/
