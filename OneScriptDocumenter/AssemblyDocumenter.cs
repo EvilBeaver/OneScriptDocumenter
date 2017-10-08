@@ -755,7 +755,7 @@ namespace OneScriptDocumenter
 
                     var nodeName = item.Name.ToString().Replace("summary", "description");
                     var xmlNode = new XElement(nodeName);
-                    ProcessChildNodes(xmlNode, item);
+                    ProcessChildNodesJSON(xmlNode, item);
                     xmlNode.Value = xmlNode.Value.Replace("\r\n", " ");
                     if (xmlNode.Value != "")
                         element.Add(xmlNode);
@@ -808,18 +808,36 @@ namespace OneScriptDocumenter
             {
                 if (node.NodeType == System.Xml.XmlNodeType.Text)
                 {
-                    textContent.Append(node.ToString());
+                    textContent.Append(new Regex("^\\s{12,13}", RegexOptions.Multiline).Replace(node.ToString(), "").Trim());
                 }
                 else if (node.NodeType == System.Xml.XmlNodeType.Element)
                 {
-                    var newElem = new XElement(((XElement)node).Name);
-                    ProcessChildNodes(newElem, (XElement)node);
-                    dest.Add(newElem);
+                    if (((XElement)node).Name == "code"){
+                        textContent.Append(node.ToString());
+                    } else {
+                        var newElem = new XElement(((XElement)node).Name);
+                        ProcessChildNodes(newElem, (XElement)node);
+                        dest.Add(newElem);
+                    }
                 }
             }
 
-            if (textContent.Length > 0)
-                dest.Add(new XElement(source.FirstAttribute.Value, textContent.ToString().Replace("\r\n", " ")));
+            if (((XElement)dest).Name != "params" && ((XElement)dest).Name != "returns")
+            {
+                foreach (var attr in source.Attributes())
+                {
+                    dest.Add(attr);
+                }
+            }
+
+            if (textContent.Length > 0) {
+                if (((XElement)dest).Name == "example")
+                    dest.Add(textContent.ToString().Replace("\r\n", "<br>").Replace("\n", " "));
+                else if (((XElement)dest).Name == "params")
+                    dest.Add(new XElement(source.FirstAttribute.Value, textContent.ToString().Replace("\r\n", " ").Replace("\n", " ")));
+                else
+                    dest.Add(textContent.ToString().Replace("\r\n", " ").Replace("\n", " "));
+            }
 
         }
 
