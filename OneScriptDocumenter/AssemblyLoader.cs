@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -76,14 +75,13 @@ namespace OneScriptDocumenter
 
             foreach (var lib in scriptEngineLibs)
             {
-                Assembly asm;
                 try
                 {
-                    asm = Assembly.ReflectionOnlyLoad(lib.FullName);
+                    Assembly.ReflectionOnlyLoad(lib.FullName);
                 }
                 catch (FileNotFoundException)
                 {
-                    asm = Assembly.ReflectionOnlyLoadFrom(Path.Combine(_baseDirectory, lib.Name + ".dll"));
+                    Assembly.ReflectionOnlyLoadFrom(Path.Combine(_baseDirectory, lib.Name + ".dll"));
                 }
             }
 

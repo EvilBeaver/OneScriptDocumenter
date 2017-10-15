@@ -103,6 +103,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="structureMenu.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="toc_layout.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

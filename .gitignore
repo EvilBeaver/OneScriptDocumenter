@@ -1,4 +1,7 @@
 OneScriptDocumenter/bin/Debug/Markdown.xslt
 *.exe
+.vs
+packages
 OneScriptDocumenter/bin/
 OneScriptDocumenter/obj/
+OneScriptDocumenter/OneScriptDocumenter.csproj.user
