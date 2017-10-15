@@ -133,13 +133,13 @@ namespace OneScriptDocumenter
                 {
                     if (((JProperty)curType).Value.SelectToken("properties") != null)
                     {
-                        if (jsonObj["globalvariable"] == null)
-                            jsonObj.Add("globalvariable", JObject.Parse(@"{ }"));
+                        if (jsonObj["globalvariables"] == null)
+                            jsonObj.Add("globalvariables", JObject.Parse(@"{ }"));
 
-                        JObject globalvariable = jsonObj["globalvariable"] as JObject;
+                        JObject globalvariables = jsonObj["globalvariables"] as JObject;
                         foreach (JToken prop in curType.First["properties"])
                         {
-                            globalvariable.Add(((JProperty)prop).Name, prop.First);
+                            globalvariables.Add(((JProperty)prop).Name, prop.First);
                         }
                     }
                     if (((JProperty)curType).Value.SelectToken("methods") != null)
