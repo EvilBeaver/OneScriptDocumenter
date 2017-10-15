@@ -77,7 +77,7 @@ namespace OneScriptDocumenter
                     docMaker.CreateDocumentationJSON(textBlocks);
                 }
                 JObject jsonObj = new JObject();
-                var list = JsonConvert.DeserializeObject<dynamic>("{" + textBlocks.TextGlobalContext.ToString());
+                var list = JsonConvert.DeserializeObject<dynamic>("{" + textBlocks.TextGlobalContext.ToString() + "}");
                 jsonObj.Add("structureMenu", JObject.Parse(@"{ }"));
                 JObject structureMenu = jsonObj["structureMenu"] as JObject;
                 if (isOscriptStd)

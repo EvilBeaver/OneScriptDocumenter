@@ -172,7 +172,7 @@ namespace OneScriptDocumenter
             {
                 using (var layout = new StreamReader(ExtFiles.Get("BasicMethods.json")))
                 {
-                    var content = layout.ReadToEnd();
+                    var content = layout.ReadToEnd().Trim();
                     textBlocks.TextGlobalContext.Append(content.Substring(1, content.Length - 2));
                 }
             }
