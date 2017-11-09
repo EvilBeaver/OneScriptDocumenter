@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -39,9 +41,25 @@ namespace OneScriptDocumenter
         public Type[] GetMarkedTypes(ScriptMemberType markupElement)
         {
             var attributeType = _assemblyLoader.MemberTypeToAttributeType(markupElement);
-            var types = AllTypes.Where(x => x.GetCustomAttributesData()
-                .FirstOrDefault(attr => attr.AttributeType == attributeType) != null);
-
+            var types = new List<Type>();
+            
+            foreach (var t in AllTypes)
+            {
+                try
+                {
+                    var attr = t.GetCustomAttributesData();
+                    foreach (var currentAttr in attr)
+                    {
+                        if (currentAttr.AttributeType == attributeType)
+                            types.Add(t);
+                    }
+                }
+                catch (FileNotFoundException)
+                {
+                    Console.WriteLine($"Skipping type {t} due to load error");
+                }
+            }
+            
             return types.ToArray();
         }
 
