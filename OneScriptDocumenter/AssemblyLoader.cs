@@ -35,7 +35,12 @@ namespace OneScriptDocumenter
             {
                 var data = args.Name.Split(',');
                 var filename = Path.Combine(_baseDirectory, data[0] + ".dll");
-                return Assembly.ReflectionOnlyLoadFrom(filename);
+                var asmLoaded = Assembly.ReflectionOnlyLoadFrom(filename);
+
+                if (asmLoaded == null)
+                    asmLoaded = Assembly.ReflectionOnlyLoad(args.Name);
+
+                return asmLoaded;
             };
 
             _classAttributeType = scriptEngineLib.GetType("ScriptEngine.Machine.Contexts.ContextClassAttribute", true);
@@ -57,15 +62,8 @@ namespace OneScriptDocumenter
                 }
             }
 
-            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += CurrentDomain_ReflectionOnlyAssemblyResolve;
-
         }
-
-        private Assembly CurrentDomain_ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            return Assembly.ReflectionOnlyLoad(args.Name);
-        }
-
+        
         public LoadedAssembly Load(string assemblyName)
         {
             var library = Assembly.ReflectionOnlyLoadFrom(Path.Combine(_baseDirectory, assemblyName));
