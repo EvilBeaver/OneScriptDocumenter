@@ -57,6 +57,9 @@ namespace OneScriptDocumenter
                 DocumentBlocks textBlocks = new DocumentBlocks();
                 bool isOscriptStd = false;
 
+                var hostedScript = new AssemblyDocumenter(Path.Combine(Path.GetDirectoryName(assemblies[0]), "ScriptEngine.HostedScript.dll"));
+                hostedScript.FillTypesDictionary();
+
                 foreach (var assembly in assemblies)
                 {
                     var name = Path.GetFileNameWithoutExtension(assembly);

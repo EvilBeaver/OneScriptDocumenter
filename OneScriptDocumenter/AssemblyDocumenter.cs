@@ -20,23 +20,8 @@ namespace OneScriptDocumenter
         public AssemblyDocumenter()
         { }
 
-        private static void GetNameAndAlias(CustomAttributeData attrib, string clrName, out string name, out string alias)
+        public AssemblyDocumenter(string library)
         {
-            name = (string)attrib.ConstructorArguments[0].Value;
-            alias = (string)attrib.ConstructorArguments[1].Value;
-            if (string.IsNullOrEmpty(alias))
-            {
-                alias = clrName;
-            }
-        }
-
-        public AssemblyDocumenter(string library, string xmldoc)
-        {
-            using (var reader = new StreamReader(xmldoc))
-            {
-                _xmlDoc = XDocument.Load(reader);
-            }
-
             var dir = Path.GetDirectoryName(library);
 
             var loader = new AssemblyLoader(dir);
@@ -46,6 +31,11 @@ namespace OneScriptDocumenter
             // add to dictinary
 
             _typesDict = new TypesDictionary();
+
+        }
+
+        public void FillTypesDictionary()
+        {
 
             ScriptMemberType[] contexts = { ScriptMemberType.GlobalContext, ScriptMemberType.Class, ScriptMemberType.SystemEnum, ScriptMemberType.EnumerationType };
             foreach (ScriptMemberType context in contexts)
@@ -73,6 +63,36 @@ namespace OneScriptDocumenter
             }
 
             _typesDict.save();
+        }
+
+        private static void GetNameAndAlias(CustomAttributeData attrib, string clrName, out string name, out string alias)
+        {
+            name = (string)attrib.ConstructorArguments[0].Value;
+            alias = (string)attrib.ConstructorArguments[1].Value;
+            if (string.IsNullOrEmpty(alias))
+            {
+                alias = clrName;
+            }
+        }
+
+        public AssemblyDocumenter(string library, string xmldoc)
+        {
+            using (var reader = new StreamReader(xmldoc))
+            {
+                _xmlDoc = XDocument.Load(reader);
+            }
+
+            var dir = Path.GetDirectoryName(library);
+
+            var loader = new AssemblyLoader(dir);
+
+            _library = loader.Load(Path.GetFileName(library));
+
+            // add to dictinary
+
+            _typesDict = new TypesDictionary();
+
+            FillTypesDictionary();
 
         }
 
