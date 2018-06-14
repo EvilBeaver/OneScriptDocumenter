@@ -26,7 +26,7 @@ namespace OneScriptDocumenter.XmlDoc
 
                 Console.WriteLine("Processing: {0}", name);
 
-                var docMaker = new AssemblyXmlDocProcessor();
+                var docMaker = new AssemblyXmlDocProcessor(assembly, xmlName);
                 var asmDoc = docMaker.CreateDocumentation();
                 result.Root.Add(new XElement("assembly",
                     new XAttribute("name", name),

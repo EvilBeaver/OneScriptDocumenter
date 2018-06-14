@@ -159,21 +159,64 @@ namespace OneScriptDocumenter.XmlDoc
                 var attrib = _library.GetMarkup(meth, ScriptMemberType.Method);
                 if (attrib != null)
                 {
-                    var fullName = classType.FullName + "." + MethodId(meth);
-                    string name, alias;
-                    GetNameAndAlias(attrib, meth.Name, out name, out alias);
-                    var element = new XElement("method");
-                    element.Add(new XAttribute("clr-name", fullName));
-                    element.Add(new XElement("name", name));
-                    element.Add(new XElement("alias", alias));
-
-                    AppendXmlDocs(element, "M:" + fullName);
-
+                    var element = WriteMethod(meth, attrib);
                     collection.Add(element);
                 }
             }
 
             childElement.Add(collection);
+        }
+
+        private XElement WriteMethod(MethodInfo meth, CustomAttributeData attrib)
+        {
+            string name, alias;
+            GetNameAndAlias(attrib, meth.Name, out name, out alias);
+            var element = new XElement("method");
+
+            var sb = new StringBuilder();
+            sb.Append(meth.Name);
+            var paramsNode = new XElement("parameters");
+            var methParams = meth.GetParameters();
+            if (methParams.Length > 0)
+            {
+                sb.Append('(');
+                string[] paramTypeNames = new string[methParams.Length];
+                for (int i = 0; i < methParams.Length; i++)
+                {
+                    var info = methParams[i];
+                    string paramType = "";
+                    if (info.ParameterType.GenericTypeArguments.Length > 0)
+                    {
+                        var genericBuilder = BuildStringGenericTypes(info.ParameterType);
+
+                        paramType = genericBuilder.ToString();
+                    }
+                    else
+                    {
+                        paramType = info.ParameterType.FullName;
+                    }
+
+                    paramTypeNames[i] = paramType;
+                    var paramNode = new XElement("param",
+                        new XAttribute("name", info.Name),
+                        new XAttribute("clr-type", paramType),
+                        new XAttribute("optional", info.IsOptional));
+
+                    paramsNode.Add(paramNode);
+
+                }
+                sb.Append(string.Join(",", paramTypeNames));
+                sb.Append(')');
+            }
+
+            var fullName = meth.DeclaringType.FullName + "." + sb.ToString();
+            element.Add(new XAttribute("clr-name", fullName));
+            element.Add(new XElement("name", name));
+            element.Add(new XElement("alias", alias));
+            element.Add(paramsNode);
+            AppendXmlDocs(element, "M:" + fullName);
+
+            return element;
         }
 
         private void AddValues(Type classType, XContainer childElement)

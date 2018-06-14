@@ -90,6 +90,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\ScriptMemberTypes.cs" />
     <Compile Include="TypesDictionary.cs" />
+    <Compile Include="XmlDoc\AssemblyXmlDocProcessor.cs" />
+    <Compile Include="XmlDoc\TypesDictionaryNew.cs" />
+    <Compile Include="XmlDoc\XmlGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -130,9 +133,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="XmlDoc\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 using System.Linq;
+using OneScriptDocumenter.XmlDoc;
 
 namespace OneScriptDocumenter
 {
@@ -205,7 +206,7 @@ namespace OneScriptDocumenter
 
         private static int CreateDocumentation(string outputFile, List<string> assemblies)
         {
-            var documenter = new Documenter();
+            var documenter = new XmlGenerator();//Documenter();
             var doc = documenter.CreateDocumentation(assemblies);
 
             doc.Save(outputFile);
