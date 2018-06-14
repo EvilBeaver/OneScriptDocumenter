@@ -49,6 +49,7 @@ namespace OneScriptDocumenter
             Console.WriteLine("Done");
             return result;
         }
+
         internal string CreateDocumentationJSON(string pathOutput, List<string> assemblies)
         {
             using (StreamWriter sbJSON = new StreamWriter(pathOutput))

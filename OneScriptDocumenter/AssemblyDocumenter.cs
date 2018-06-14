@@ -801,7 +801,7 @@ namespace OneScriptDocumenter
             {
                 if (node.NodeType == System.Xml.XmlNodeType.Text)
                 {
-                    textContent.Append(CollapseWhiteSpace(node.ToString()));
+                    dest.Add(new XText((XText)node));
                 }
                 else if (node.NodeType == System.Xml.XmlNodeType.Element)
                 {
