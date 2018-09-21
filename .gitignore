@@ -5,3 +5,4 @@ packages
 OneScriptDocumenter/bin/
 OneScriptDocumenter/obj/
 OneScriptDocumenter/OneScriptDocumenter.csproj.user
+/documenter/obj/Debug
