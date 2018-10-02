@@ -318,10 +318,13 @@ namespace OneScriptDocumenter
                     AddProperties(globalContext, childElement, "JSON");
                     AddMethodsJSON(globalContext, childElement);
 
-                    var JSONNode = JSon.XmlToJSON(childElement.ToString());
-                    var separatorPos = JSONNode.IndexOf(":", StringComparison.InvariantCulture);
-                    JSONNode = JSONNode.Substring(0, separatorPos).Replace("_", " ") + JSONNode.Substring(separatorPos);
-                    textBlocks.TextGlobalContext.Append(JSONNode.Substring(1, JSONNode.Length - 2) + ",");
+                    if (!childElement.IsEmpty)
+                    {
+                        var JSONNode = JSon.XmlToJSON(childElement.ToString());
+                        var separatorPos = JSONNode.IndexOf(":", StringComparison.InvariantCulture);
+                        JSONNode = JSONNode.Substring(0, separatorPos).Replace("_", " ") + JSONNode.Substring(separatorPos);
+                        textBlocks.TextGlobalContext.Append(JSONNode.Substring(1, JSONNode.Length - 2) + ",");
+                    }
                 }
             }
             catch (InvalidOperationException)
